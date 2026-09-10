@@ -162,10 +162,14 @@
     for (let pass = 0; pass < 10; pass++) {
       const before = result;
       result = result.replace(/@@MATH_AGENT_(\d+)@@/g, function (_, index) {
-        return placeholders[Number(index)];
+        const replacement = placeholders[Number(index)];
+        return replacement === undefined ? "" : replacement;
       });
       if (result === before) break;
     }
+
+    // 兜底：任何因为异常情况残留的占位符都不应直接显示给用户。
+    result = result.replace(/@@MATH_AGENT_\d+@@/g, "");
 
     return result;
   }
