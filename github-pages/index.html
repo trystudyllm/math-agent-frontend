@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>高等数学智能助教</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero-overlay">
+        <div class="hero-inner">
+          <div class="brand-badge">高数 AI</div>
+          <h1 id="appTitle">高等数学智能助教</h1>
+          <p id="appSubtitle">知识点 · 期末大纲 · 作业辅导</p>
+        </div>
+      </div>
+    </header>
+
+    <main class="chat-shell">
+      <section id="chatLog" class="chat-log" aria-live="polite"></section>
+
+      <section class="input-area">
+        <form id="chatForm" class="chat-form">
+          <div class="input-row">
+            <textarea
+              id="messageInput"
+              rows="1"
+              maxlength="4000"
+              placeholder="输入你的数学问题，例如：求函数 f(x)=x² 的导数"
+            ></textarea>
+            <button id="sendButton" type="submit" aria-label="发送">
+              <span>发送</span>
+            </button>
+          </div>
+          <div class="form-hint">支持公式输入；助教只回答数学相关问题。</div>
+        </form>
+
+        <div id="agentCards" class="agent-cards" aria-label="选择助教"></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <a href="./admin.html">管理后台</a>
+      <span>高等数学智能助教 · 仅用于学习交流</span>
+    </footer>
+
+    <script src="./config.js"></script>
+    <script src="./render.js"></script>
+    <script src="./app.js"></script>
+    <script>
+      window.MathJax = {
+        tex: {
+          inlineMath: [["\\(", "\\)"], ["$", "$"]],
+          displayMath: [["\\[", "\\]"], ["$$", "$$"]],
+        },
+        options: {
+          skipHtmlTags: ["script", "noscript", "style", "textarea", "pre", "code"],
+        },
+      };
+    </script>
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+    ></script>
+  </body>
+</html>
