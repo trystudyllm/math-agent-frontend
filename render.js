@@ -21,6 +21,19 @@
       return token;
     }
 
+    function expandTokens(value) {
+      let expanded = String(value);
+      for (let pass = 0; pass < 10; pass++) {
+        const before = expanded;
+        expanded = expanded.replace(/@@MATH_AGENT_(\d+)@@/g, function (_, index) {
+          const replacement = placeholders[Number(index)];
+          return replacement === undefined ? "" : replacement;
+        });
+        if (expanded === before) break;
+      }
+      return expanded.replace(/@@MATH_AGENT_\d+@@/g, "");
+    }
+
     // 代码块优先，避免内部内容被 Markdown 改写。
     text = text.replace(/```([\s\S]*?)```/g, function (_, code) {
       const clean = code.replace(/^\w+\n/, "");
@@ -96,9 +109,8 @@
                 .join("")}</tbody>`
             : "";
 
-          output.push(
-            store(`<div class="table-wrap"><table>${thead}${tbody}</table></div>`)
-          );
+          const tableHtml = `<div class="table-wrap"><table>${thead}${tbody}</table></div>`;
+          output.push(store(expandTokens(tableHtml)));
         } else {
           output.push(line);
         }
@@ -158,18 +170,7 @@
     result = result.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
     result = result.replace(/(^|[^*])\*([^*\n]+)\*/g, "$1<em>$2</em>");
 
-    // 占位符可能互相嵌套，例如表格里包含公式。多轮替换，直到全部展开。
-    for (let pass = 0; pass < 10; pass++) {
-      const before = result;
-      result = result.replace(/@@MATH_AGENT_(\d+)@@/g, function (_, index) {
-        const replacement = placeholders[Number(index)];
-        return replacement === undefined ? "" : replacement;
-      });
-      if (result === before) break;
-    }
-
-    // 兜底：任何因为异常情况残留的占位符都不应直接显示给用户。
-    result = result.replace(/@@MATH_AGENT_\d+@@/g, "");
+    result = expandTokens(result);
 
     return result;
   }
