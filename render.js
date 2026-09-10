@@ -158,9 +158,14 @@
     result = result.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
     result = result.replace(/(^|[^*])\*([^*\n]+)\*/g, "$1<em>$2</em>");
 
-    placeholders.forEach((value, index) => {
-      result = result.replace(`@@MATH_AGENT_${index}@@`, value);
-    });
+    // 占位符可能互相嵌套，例如表格里包含公式。多轮替换，直到全部展开。
+    for (let pass = 0; pass < 10; pass++) {
+      const before = result;
+      result = result.replace(/@@MATH_AGENT_(\d+)@@/g, function (_, index) {
+        return placeholders[Number(index)];
+      });
+      if (result === before) break;
+    }
 
     return result;
   }
