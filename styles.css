@@ -181,7 +181,8 @@ body {
   padding: 12px 15px;
   border-radius: 16px;
   background: var(--surface-soft);
-  line-height: 1.75;
+  font-size: 15px;
+  line-height: 1.68;
   word-break: break-word;
   white-space: normal;
 }
@@ -227,7 +228,7 @@ body {
   padding: 13px;
   border-radius: 12px;
   overflow-x: auto;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .bubble code:not(pre code) {
@@ -235,12 +236,14 @@ body {
   padding: 2px 5px;
   border-radius: 5px;
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.9em;
 }
 
 .bubble ul,
 .bubble ol {
   margin: 0.45em 0;
   padding-left: 1.4em;
+  line-height: 1.65;
 }
 
 .bubble h1,
@@ -248,6 +251,28 @@ body {
 .bubble h3 {
   margin: 0.7em 0 0.3em;
   line-height: 1.35;
+}
+
+.bubble h1 {
+  font-size: 1.35em;
+}
+
+.bubble h2 {
+  font-size: 1.2em;
+}
+
+.bubble h3 {
+  font-size: 1.05em;
+}
+
+.bubble .math-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.35em 0;
+}
+
+.bubble mjx-container {
+  font-size: 1em;
 }
 
 .typing-indicator {

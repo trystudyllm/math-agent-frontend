@@ -76,9 +76,6 @@
 
       flushList();
       if (!trimmed) {
-        if (html.length && html[html.length - 1] !== "<br/>") {
-          html.push("<br/>");
-        }
         continue;
       }
 
