@@ -40,15 +40,39 @@ body {
 .hero {
   position: relative;
   min-height: 190px;
-  background-image:
-    linear-gradient(90deg, rgba(17, 24, 39, 0.74), rgba(30, 64, 175, 0.46)),
-    url("./assets/background-1.jpg");
-  background-position: center;
-  background-size: cover;
   color: #fff;
 }
 
+.hero-slides {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #0f172a;
+}
+
+.hero-slide {
+  position: absolute;
+  inset: 0;
+  background-position: center;
+  background-size: cover;
+  opacity: 0;
+  transition: opacity 1.1s ease;
+}
+
+.hero-slide.active {
+  opacity: 1;
+}
+
+.hero-slide::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(17, 24, 39, 0.76), rgba(30, 64, 175, 0.48));
+}
+
 .hero-overlay {
+  position: relative;
+  z-index: 1;
   min-height: 190px;
   display: flex;
   align-items: center;

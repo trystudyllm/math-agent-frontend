@@ -209,6 +209,17 @@
     messageInput.style.height = Math.min(messageInput.scrollHeight, 180) + "px";
   }
 
+  function startHeroSlideshow() {
+    const slides = document.querySelectorAll(".hero-slide");
+    if (slides.length < 2) return;
+    let activeIndex = 0;
+    setInterval(function () {
+      slides[activeIndex].classList.remove("active");
+      activeIndex = (activeIndex + 1) % slides.length;
+      slides[activeIndex].classList.add("active");
+    }, 5000);
+  }
+
   async function loadConfig() {
     try {
       const response = await fetch(apiUrl("/api/config/public"));
@@ -262,5 +273,6 @@
     }
   });
 
+  startHeroSlideshow();
   loadConfig();
 })();
