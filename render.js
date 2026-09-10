@@ -48,6 +48,67 @@
 
     text = escapeHtml(text);
 
+    function isTableRow(line) {
+      return /^\s*\|.*\|\s*$/.test(line);
+    }
+
+    function isTableSeparator(line) {
+      return /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|?\s*$/.test(line);
+    }
+
+    function parseTableRow(line) {
+      return line
+        .trim()
+        .replace(/^\|/, "")
+        .replace(/\|$/, "")
+        .split("|")
+        .map((cell) => cell.trim());
+    }
+
+    function renderTables(input) {
+      const lines = input.split("\n");
+      const output = [];
+
+      for (let index = 0; index < lines.length; index++) {
+        const line = lines[index];
+        const nextLine = lines[index + 1] || "";
+
+        if (isTableRow(line) && isTableSeparator(nextLine)) {
+          const headerCells = parseTableRow(line);
+          const bodyRows = [];
+          index += 2;
+
+          while (index < lines.length && isTableRow(lines[index])) {
+            bodyRows.push(parseTableRow(lines[index]));
+            index++;
+          }
+          index--;
+
+          const thead = `<thead><tr>${headerCells
+            .map((cell) => `<th>${cell}</th>`)
+            .join("")}</tr></thead>`;
+          const tbody = bodyRows.length
+            ? `<tbody>${bodyRows
+                .map(
+                  (row) =>
+                    `<tr>${row.map((cell) => `<td>${cell}</td>`).join("")}</tr>`
+                )
+                .join("")}</tbody>`
+            : "";
+
+          output.push(
+            store(`<div class="table-wrap"><table>${thead}${tbody}</table></div>`)
+          );
+        } else {
+          output.push(line);
+        }
+      }
+
+      return output.join("\n");
+    }
+
+    text = renderTables(text);
+
     const lines = text.split("\n");
     const html = [];
     let listType = null;
@@ -76,6 +137,11 @@
 
       flushList();
       if (!trimmed) {
+        continue;
+      }
+
+      if (/^@@MATH_AGENT_\d+@@$/.test(trimmed)) {
+        html.push(trimmed);
         continue;
       }
 

@@ -275,6 +275,47 @@ body {
   font-size: 1em;
 }
 
+.bubble .table-wrap {
+  overflow-x: auto;
+  margin: 0.65em 0;
+}
+
+.bubble table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95em;
+}
+
+.bubble th,
+.bubble td {
+  border: 1px solid var(--border);
+  padding: 7px 9px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.bubble th {
+  background: #eef3fa;
+  font-weight: 700;
+}
+
+.bubble tbody tr:nth-child(even) td {
+  background: #f8fafc;
+}
+
+.message.user .bubble table {
+  color: #fff;
+}
+
+.message.user .bubble th,
+.message.user .bubble td {
+  border-color: rgba(255, 255, 255, 0.42);
+}
+
+.message.user .bubble th {
+  background: rgba(255, 255, 255, 0.12);
+}
+
 .typing-indicator {
   display: inline-flex;
   gap: 4px;
