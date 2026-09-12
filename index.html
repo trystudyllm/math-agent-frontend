@@ -28,17 +28,22 @@
       <section class="input-area">
         <form id="chatForm" class="chat-form">
           <div class="input-row">
+            <button id="imageButton" type="button" class="icon-button" aria-label="添加作业图片">
+              📷
+            </button>
+            <input id="imageInput" type="file" accept="image/*" multiple hidden />
             <textarea
               id="messageInput"
               rows="1"
               maxlength="4000"
-              placeholder="输入你的数学问题，例如：求函数 f(x)=x² 的导数"
+              placeholder="输入数学问题，或拍照上传作业题"
             ></textarea>
             <button id="sendButton" type="submit" aria-label="发送">
               <span>发送</span>
             </button>
           </div>
-          <div class="form-hint">支持公式输入；助教只回答数学相关问题。</div>
+          <div id="imagePreview" class="image-preview"></div>
+          <div class="form-hint">支持文字公式和作业图片；助教只回答数学相关问题。</div>
         </form>
 
         <div id="agentCards" class="agent-cards" aria-label="选择助教"></div>

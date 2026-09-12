@@ -5,6 +5,9 @@
   const chatForm = document.getElementById("chatForm");
   const messageInput = document.getElementById("messageInput");
   const sendButton = document.getElementById("sendButton");
+  const imageButton = document.getElementById("imageButton");
+  const imageInput = document.getElementById("imageInput");
+  const imagePreview = document.getElementById("imagePreview");
   const agentCards = document.getElementById("agentCards");
   const appTitle = document.getElementById("appTitle");
   const appSubtitle = document.getElementById("appSubtitle");
@@ -15,6 +18,7 @@
   let messages = [];
   let isStreaming = false;
   let mathTimer = null;
+  let pendingImages = [];
 
   function apiUrl(path) {
     return `${API_BASE}${path}`;
@@ -78,13 +82,18 @@
     }, 300);
   }
 
-  function addMessage(role, content, extraClass) {
+  function addMessage(role, content, extraClass, images) {
     const wrapper = document.createElement("div");
     wrapper.className = `message ${role} ${extraClass || ""}`.trim();
     const avatar = role === "user" ? "🙋" : "🧑‍🏫";
+    const imagesHtml = images && images.length
+      ? `<div class="message-images">${images
+          .map((src) => `<img src="${escapeHtml(src)}" alt="作业图片" />`)
+          .join("")}</div>`
+      : "";
     wrapper.innerHTML = `
       <div class="avatar">${avatar}</div>
-      <div class="bubble">${window.renderMarkdown(content) || "..."}</div>
+      <div class="bubble">${window.renderMarkdown(content) || "..."}${imagesHtml}</div>
     `;
     chatLog.appendChild(wrapper);
     scrollToBottom();
@@ -114,16 +123,22 @@
     isStreaming = value;
     sendButton.disabled = value;
     messageInput.disabled = value;
+    imageButton.disabled = value;
+    imageInput.disabled = value;
     sendButton.querySelector("span").textContent = value ? "回答中" : "发送";
   }
 
   async function sendMessage() {
     const text = messageInput.value.trim();
-    if (!text || isStreaming) return;
+    const images = pendingImages.slice();
+    if ((!text && images.length === 0) || isStreaming) return;
 
-    messages.push({ role: "user", content: text });
-    addMessage("user", text);
+    const userText = text || "请帮我看看图片里的数学题。";
+    messages.push({ role: "user", content: userText });
+    addMessage("user", userText, "", images);
     messageInput.value = "";
+    pendingImages = [];
+    renderImagePreview();
     autoResize();
     setStreaming(true);
 
@@ -138,6 +153,7 @@
         body: JSON.stringify({
           agent: currentAgent,
           messages: messages,
+          images: images,
         }),
       });
 
@@ -204,6 +220,99 @@
     }
   }
 
+  function fileToDataUrl(file) {
+    return new Promise(function (resolve, reject) {
+      const reader = new FileReader();
+      reader.onload = function () {
+        resolve(reader.result);
+      };
+      reader.onerror = function () {
+        reject(new Error("图片读取失败。"));
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function compressImage(file) {
+    return new Promise(async function (resolve, reject) {
+      try {
+        const originalDataUrl = await fileToDataUrl(file);
+        const image = new Image();
+        image.onload = function () {
+          const maxSide = 1600;
+          let width = image.width;
+          let height = image.height;
+          if (width > maxSide || height > maxSide) {
+            const ratio = Math.min(maxSide / width, maxSide / height);
+            width = Math.max(1, Math.round(width * ratio));
+            height = Math.max(1, Math.round(height * ratio));
+          }
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const context = canvas.getContext("2d");
+          context.drawImage(image, 0, 0, width, height);
+          resolve(canvas.toDataURL("image/jpeg", 0.82));
+        };
+        image.onerror = function () {
+          reject(new Error("图片格式不支持。"));
+        };
+        image.src = originalDataUrl;
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  function renderImagePreview() {
+    imagePreview.innerHTML = "";
+    pendingImages.forEach(function (src, index) {
+      const item = document.createElement("div");
+      item.className = "image-preview-item";
+      const image = document.createElement("img");
+      image.src = src;
+      image.alt = "待上传图片";
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.textContent = "×";
+      remove.setAttribute("aria-label", "移除图片");
+      remove.addEventListener("click", function () {
+        pendingImages.splice(index, 1);
+        renderImagePreview();
+      });
+      item.appendChild(image);
+      item.appendChild(remove);
+      imagePreview.appendChild(item);
+    });
+  }
+
+  async function handleImageFiles(fileList) {
+    const files = Array.from(fileList || []).slice(0, 4 - pendingImages.length);
+    if (!files.length) return;
+    setStatusLike("正在处理图片...");
+    for (const file of files) {
+      try {
+        const dataUrl = await compressImage(file);
+        pendingImages.push(dataUrl);
+      } catch (error) {
+        window.alert(error.message || "图片处理失败。");
+      }
+    }
+    renderImagePreview();
+    setStatusLike("");
+  }
+
+  function setStatusLike(message) {
+    if (!imageButton) return;
+    if (message) {
+      imageButton.textContent = "⏳";
+      imageButton.title = message;
+    } else {
+      imageButton.textContent = "📷";
+      imageButton.title = "添加作业图片";
+    }
+  }
+
   function autoResize() {
     messageInput.style.height = "auto";
     messageInput.style.height = Math.min(messageInput.scrollHeight, 180) + "px";
@@ -263,6 +372,19 @@
   chatForm.addEventListener("submit", function (event) {
     event.preventDefault();
     sendMessage();
+  });
+
+  imageButton.addEventListener("click", function () {
+    if (pendingImages.length >= 4) {
+      window.alert("最多上传 4 张图片。");
+      return;
+    }
+    imageInput.click();
+  });
+
+  imageInput.addEventListener("change", function () {
+    handleImageFiles(imageInput.files);
+    imageInput.value = "";
   });
 
   messageInput.addEventListener("input", autoResize);
